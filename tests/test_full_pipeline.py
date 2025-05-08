@@ -189,11 +189,11 @@ if __name__ == "__main__":
 
     print("\n" + "="*70 + "\n")
 
-    # Test 2: HuggingFaceH4/tiny-llama-1.1b-chat-v1.0 (Real Chat Model, non-gated)
+    # Test 2: vikp/instruct_llama_7b (Real Chat Model, non-gated)
     passed_tiny_llama = False
     try:
         passed_tiny_llama = run_real_model_test_pipeline(
-            base_model_name="HuggingFaceH4/tiny-llama-1.1b-chat-v1.0", 
+            base_model_name="vikp/instruct_llama_7b", 
             model_type="chat"
         )
     except Exception as e:
