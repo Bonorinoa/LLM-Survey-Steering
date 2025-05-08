@@ -1,9 +1,10 @@
 # requirements.txt
-torch==2.0.0+cu117   # Pinning to your exact working PyTorch version
-# or torch>=2.0.0,<2.1.0 # If you want to allow minor updates but stay in 2.0.x
-transformers>=4.30.0 # Keep this or update if needed, but it should be fine
+torch
+transformers
+huggingface_hub[cli]
+huggingface_hub[hf_xet] # faster downloads with Xet Storage
 pandas
-numpy<2.0,>=1.21     # <<<< Crucial Change Here
+numpy
 matplotlib
 scikit-learn
 scipy
