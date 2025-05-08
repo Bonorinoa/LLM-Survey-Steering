@@ -1,6 +1,7 @@
 # llm_survey_steering/data_processing/wvs_processor.py
 
 import pandas as pd
+import random
 from sklearn.model_selection import train_test_split # Keep for direct use here if preferred
 from collections import Counter
 # No direct import of config constants like TRAINING_PROMPT_FORMAT if passed via config_obj
@@ -198,3 +199,54 @@ def generate_prompt_data_from_wvs_split(wvs_split_df: pd.DataFrame,
         return output_prompts_or_examples, ground_truth_distributions
     else:
         return output_prompts_or_examples
+    
+
+def generate_synthetic_wvs_data(num_rows: int, target_countries: list, 
+                                econ_q_ids: list, demo_vars: list, 
+                                general_vars: list) -> pd.DataFrame:
+    """
+    Generates a small synthetic DataFrame mimicking WVS structure for quick testing.
+    """
+    data = []
+    if not target_countries: # Ensure there's at least one country to pick from
+        target_countries = ['SYN'] 
+
+    for _ in range(num_rows):
+        row = {}
+        # General vars
+        if 'B_COUNTRY_ALPHA' in general_vars:
+            row['B_COUNTRY_ALPHA'] = random.choice(target_countries)
+        
+        # Demo vars
+        if 'Q262' in demo_vars: # Assuming Q262 is for Age
+            row['Q262'] = random.randint(18, 75) 
+        
+        # Economic questions
+        for q_id in econ_q_ids:
+            row[q_id] = random.randint(1, 10)
+        data.append(row)
+    
+    df = pd.DataFrame(data)
+    
+    # Apply minimal preprocessing similar to preprocess_wvs_data
+    # This part was simplified in the test script's local synthetic generator,
+    # but it's good practice to have it here if this function were to be more general.
+    # For the test script, it calls map_age_to_group separately.
+    # Let's make this consistent with how the test script expects to use it,
+    # or make it fully self-contained with age group mapping.
+
+    # For direct use by the test script, which calls map_age_to_group afterwards,
+    # we might not need to map age groups here.
+    # However, if you intend this function to be a general utility, add it:
+    # if 'Q262' in df.columns and 'Q262' in demo_vars: # If Q262 represents age
+    #    df['Age_Group'] = df['Q262'].apply(map_age_to_group)
+    # elif 'Age_Group' not in df.columns: # Ensure Age_Group column exists
+    #    df['Age_Group'] = "Unknown"
+        
+    # Ensure numeric types for question IDs, similar to preprocess_wvs_data
+    for q_id in econ_q_ids:
+        if q_id in df.columns:
+            df[q_id] = pd.to_numeric(df[q_id], errors='coerce')
+            
+    print(f"Generated {len(df)} rows of synthetic WVS-like data for wvs_processor.")
+    return df
