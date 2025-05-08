@@ -76,10 +76,32 @@ def run_pipeline_for_test_model(base_model_name: str, model_type: str):
     config.setup_seeds()
     print(f"Using device: {config.device}")
 
-    # 1. Initialize Models & Tokenizer
     print("Initializing models & tokenizer...")
     base_model, reweighting_model = load_models_and_tokenizer(config)
-    # config.tokenizer and config.vocab_size are now set
+
+    # === ADD THIS SECTION FOR CHAT TEMPLATE (START) ===
+    if config.MODEL_TYPE == "chat" and config.tokenizer.chat_template is None:
+        print(f"WARNING: Tokenizer for {config.BASE_MODEL_NAME} does not have a default chat template. "
+            "Applying a basic one for testing chat logic.")
+        # A very basic template suitable for many models if they don't have one.
+        # This example uses a simple User/Assistant structure.
+        # For more complex roles or system prompts, this would need to be more elaborate.
+        config.tokenizer.chat_template = (
+            "{% for message in messages %}"
+                "{% if message['role'] == 'user' %}"
+                    "User: {{ message['content'] }}\n"
+                "{% elif message['role'] == 'assistant' %}"
+                    "Assistant: {{ message['content'] }}{{ eos_token if not loop.last }}\n" # Add EOS for assistant turns
+                "{% else %}"
+                    "{{ message['role'] }}: {{ message['content'] }}\n"
+                "{% endif %}"
+            "{% endfor %}"
+            # "{% if add_generation_prompt and messages[-1]['role'] != 'assistant' %}" # Handled by add_generation_prompt=True in apply_chat_template
+            #     "Assistant:\n"
+            # "{% endif %}"
+        )
+        print(f"Applied custom chat template: {config.tokenizer.chat_template}")
+    # === ADD THIS SECTION FOR CHAT TEMPLATE (END) ===
 
     # 2. Generate & Process Synthetic Data for this run
     synthetic_df = generate_minimal_synthetic_df(num_rows=30, config_obj=config) # More rows for better split
@@ -155,9 +177,11 @@ def run_pipeline_for_test_model(base_model_name: str, model_type: str):
     if config.GENERATION_PROMPTS_SURVEY:
         print("Evaluating survey responses...")
         evaluation_df = evaluate_survey_responses(
-            config, base_model,
-            reweighting_model if loss_history else None,
-            config.GROUND_TRUTH_DISTRIBUTIONS
+            config_obj=config,  # Pass the full config object
+            tokenizer=config.tokenizer, # Explicitly pass the tokenizer
+            base_model=base_model,
+            reweighting_model=reweighting_model if loss_history else None,
+            ground_truth_distributions_map=config.GROUND_TRUTH_DISTRIBUTIONS # Correct
         )
         if not evaluation_df.empty:
             print("Minimal Evaluation Results (first row):")
