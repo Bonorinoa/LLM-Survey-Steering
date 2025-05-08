@@ -62,6 +62,11 @@ def evaluate_survey_responses(config_obj, tokenizer, base_model,
                     plugin_responses_parsed.append(parsed_val)
         else: # If no reweighting, plugin responses are effectively same as base or empty
             plugin_responses_parsed = [] # Or copy base if that's the desired comparison
+            
+        if not base_responses_parsed and base_responses_raw: # If parsing failed for base
+            print(f"DEBUG: Raw base responses for prompt '{prompt_text[:100]}...' (sample): {base_responses_raw[:2]}")
+        if not plugin_responses_parsed and plugin_responses_raw: # If parsing failed for plugin
+            print(f"DEBUG: Raw plugin responses for prompt '{prompt_text[:100]}...' (sample): {plugin_responses_raw[:2]}")
 
         # Create distributions from parsed valid responses
         base_dist_counts = Counter(base_responses_parsed)
