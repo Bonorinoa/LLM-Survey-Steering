@@ -1,0 +1,45 @@
+# pyproject.toml
+
+[build-system]
+requires = ["setuptools>=61.0", "wheel"] # Make sure wheel is here
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "llm_survey_steering"
+version = "0.1.0"
+authors = [
+  { name="Your Name", email="your.email@example.com" }, # Replace with your details
+]
+description = "A package for steering LLMs to simulate survey responses using logit-based reweighting."
+readme = "README.md"
+requires-python = ">=3.8"
+# Use SPDX identifier for license instead of classifier for modern practice
+license = {text = "MIT License"} # This replaces the license classifier
+classifiers = [
+    "Programming Language :: Python :: 3",
+    # "License :: OSI Approved :: MIT License", # Remove this line
+    "Operating System :: OS Independent",
+    "Intended Audience :: Science/Research",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+    "Topic :: Text Processing :: Linguistic",
+]
+dependencies = [
+    "torch",
+    "transformers",
+    "pandas",
+    "numpy",
+    "matplotlib",
+    "scikit-learn",
+    "scipy",
+    "tqdm",
+]
+
+# Add this section to explicitly tell setuptools where to find your package
+[tool.setuptools.packages.find]
+where = ["."]  # Look in the current directory (root of the project)
+include = ["llm_survey_steering*"]  # Include the 'llm_survey_steering' package and its subpackages
+exclude = ["data*", "logprobs_venv*", "scripts*", "tests*"] # Exclude other top-level dirs not part of the package
+
+# Optional: If you still have issues, you can be more direct
+# [tool.setuptools]
+# packages = ["llm_survey_steering"] # Directly list the main package directory
